@@ -1,7 +1,7 @@
 /******************************************************************************************
- * FileName     : main.ino
- * Description  : Send the values of the temperature and humidity sensor, light sensor, gas sensor, and vibration sensor via HTTP / If the temperature exceeds 28     degrees Celsius, activate the motor (fan)
- * Author       : GiBeom Park
+ * FileName      : main.ino
+ * Description   : Send the values of the temperature and humidity sensor, light sensor, gas sensor, and vibration sensor via HTTP / If the temperature exceeds 28     degrees Celsius, activate the motor (fan)
+ * Author        : GiBeom Park
  * Last Modified : 2024.08.14
  ******************************************************************************************/
 #include <WiFi.h>
