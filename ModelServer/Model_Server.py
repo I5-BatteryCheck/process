@@ -28,8 +28,8 @@ img_path = ['./img_folder']
 models = []
 # index 0 model is preprocessing model
 model_path =[
-    './best.pt',
-    './best.pt'
+    './nm_best.pt',
+    './bl_best.pt'
 ]
 for path in model_path:
     if os.path.exists(path):
@@ -46,7 +46,7 @@ CORS(app)
 # Receive Data from Raspberry Pi
 # Predict & Send Results
 @app.route('/model', methods=['POST'])
-def read_sensor():
+def run_model():
     print("@model")
     print("@model")
 
@@ -70,12 +70,12 @@ def read_sensor():
     print(img_path_list)
 
     # Model preprocess (crop image)
-    cropped_image_path_list = preprocess(models[0], img_path_list, img_path[0])
+    cropped_image_path_list, crop_point = preprocess(models[0], img_path_list, img_path[0])
     print(cropped_image_path_list)
 
     # Model predict
     result = []
-    result.append(predict(models[1], img_path_list)) # !crop_img_path_list
+    result.append(predict(models[1], cropped_image_path_list)) # !crop_img_path_list
     print(result)
 
     # (Not implemented) Ensenble
@@ -83,7 +83,7 @@ def read_sensor():
         fine_result = result[0]
 
     # Draw boundary box
-    boxed_image_path_list = draw_bb(img_path_list, fine_result, img_path[0]) #!cropped_image_path_list
+    boxed_image_path_list = draw_bb(img_path_list, fine_result, crop_point, img_path[0]) #!cropped_image_path_list
     print(boxed_image_path_list)
 
     # Post-processing & Make send data

@@ -1,12 +1,15 @@
 import os
 import random
-from PIL import Image
+from PIL import Image, ImageDraw
+
+
+
 
 
 def preprocess(model, img_path_list, img_path):
-    Pad = 0.2
+    Pad = 0.05
     cropped_image_path_list = []
-
+    crop_point = []
     # model predict 
     results = model(img_path_list)
 
@@ -37,12 +40,25 @@ def preprocess(model, img_path_list, img_path):
             xmax = max(x2_list)
             ymax = max(y2_list)
 
+            a = max([xmax-xmin, ymax-ymin])
+
             # find crop box
-            X1 = int(xmin -image_width *(0.05* random.randint(0, 1)) +Pad)
-            Y1 = int(ymin -image_height*(0.05* random.randint(0, 1)) +Pad)
-            X2 = int(xmax +image_width *(0.05* random.randint(0, 1)) +Pad)
-            Y2 = int(ymax +image_height*(0.05* random.randint(0, 1)) +Pad)
+            X1 = int(xmin -a *(0.05 *random.randint(0, 1) +Pad))
+            Y1 = int(ymin -a *(0.05 *random.randint(0, 1) +Pad))
+            X2 = int(xmax +a *(0.05 *random.randint(0, 1) +Pad))
+            Y2 = int(ymax +a *(0.05 *random.randint(0, 1) +Pad))
             
+            #black
+            black_image = Image.new('RGB', image.size, (0, 0, 0))  # 검정색으로 채운 이미지 생성
+
+            # 기존 이미지를 네모 영역만 보이도록 만듭니다.
+            mask = Image.new('L', image.size, 0)  # 검정색(0)으로 채운 마스크 이미지 생성
+            draw = ImageDraw.Draw(mask)
+            draw.rectangle([X1,Y1,X2,Y2], fill=255)  # 흰색(255)으로 네모 영역을 그립니다.
+
+            # 네모 영역을 제외한 다른 부분을 검정색으로 설정합니다.
+            result_image = Image.composite(image, black_image, mask)
+
             W = X2-X1
             H = Y2-Y1
             CX = (X1+X2)//2
@@ -75,16 +91,17 @@ def preprocess(model, img_path_list, img_path):
                 Crop_y2 = image_height
 
             # crop image & save
-            cropped_image = image.crop((Crop_x1, Crop_y1, Crop_x2, Crop_y2))
+            cropped_image = result_image.crop((Crop_x1, Crop_y1, Crop_x2, Crop_y2))
 
         # battery not found
         else:
             cropped_image = image
             print(f'not found battery_{i} in PREPROCESS')
-
+            Crop_x1, Crop_y1 = 0, 0
         # save cropped image
         cropped_image_path = os.path.join( img_path, f'cropped_img_{i}.jpg')
         cropped_image_path_list.append( cropped_image_path)
         cropped_image.save( cropped_image_path)
+        crop_point.append([Crop_x1, Crop_y1])
             
-    return cropped_image_path_list
+    return cropped_image_path_list, crop_point

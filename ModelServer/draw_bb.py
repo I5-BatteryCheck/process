@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def draw_bb(image_path_list, result, img_path):
+def draw_bb(image_path_list, result, crop_point, img_path):
     boxed_image_path_list = []
     class_names = ['battery', 'damaged', 'pollution']
 
@@ -20,8 +20,10 @@ def draw_bb(image_path_list, result, img_path):
         # detected object in one picture unit
         for c, box in zip(result[f'{i}']['cls'], result[f'{i}']['xyxy']):
             box = list(map(int, box))
-            x_min, y_min, x_max, y_max = box
-
+            x_min = int(box[0] +crop_point[i][0])
+            y_min = int(box[1] +crop_point[i][1])
+            x_max = int(box[2] +crop_point[i][0])
+            y_max = int(box[3] +crop_point[i][1])
             # Draw the rectangle
             cv2.rectangle(image, (x_min, y_min), (x_max, y_max), color[int(c)], thickness)
 
