@@ -1,13 +1,20 @@
-import os
+"""
+******************************************************************************************
+ * FileName      : preprocessing.py
+ * Description   : Function to Black Crop Images for Enhanced Detection
+ * Author        : Dae ho Kang
+ * Last modified : 2024.08.14
+ ******************************************************************************************
+"""
+
+
 import random
 from PIL import Image, ImageDraw
 
 
-
-
-
-def preprocess(model, img_list):
-    Pad = 0.05
+def preprocess(model, img_list, pad):
+    cons_pad = pad['cons_pad']
+    rand_pad = pad['rand_pad']
     cropped_image_list = []
     crop_point = []
     # model predict 
@@ -43,20 +50,16 @@ def preprocess(model, img_list):
             a = max([xmax-xmin, ymax-ymin])
 
             # find crop box
-            X1 = int(xmin -a *(0.05 *random.randint(0, 1) +Pad))
-            Y1 = int(ymin -a *(0.05 *random.randint(0, 1) +Pad))
-            X2 = int(xmax +a *(0.05 *random.randint(0, 1) +Pad))
-            Y2 = int(ymax +a *(0.05 *random.randint(0, 1) +Pad))
+            X1 = int(xmin -a *(rand_pad *random.randint(0, 1) +cons_pad))
+            Y1 = int(ymin -a *(rand_pad *random.randint(0, 1) +cons_pad))
+            X2 = int(xmax +a *(rand_pad *random.randint(0, 1) +cons_pad))
+            Y2 = int(ymax +a *(rand_pad *random.randint(0, 1) +cons_pad))
             
-            #black
-            black_image = Image.new('RGB', image.size, (0, 0, 0))  # 검정색으로 채운 이미지 생성
-
-            # 기존 이미지를 네모 영역만 보이도록 만듭니다.
-            mask = Image.new('L', image.size, 0)  # 검정색(0)으로 채운 마스크 이미지 생성
+            # black crop 
+            black_image = Image.new('RGB', image.size, (0, 0, 0))
+            mask = Image.new('L', image.size, 0)
             draw = ImageDraw.Draw(mask)
-            draw.rectangle([X1,Y1,X2,Y2], fill=255)  # 흰색(255)으로 네모 영역을 그립니다.
-
-            # 네모 영역을 제외한 다른 부분을 검정색으로 설정합니다.
+            draw.rectangle([X1,Y1,X2,Y2], fill=255)
             result_image = Image.composite(image, black_image, mask)
 
             W = X2-X1
@@ -104,3 +107,11 @@ def preprocess(model, img_list):
         crop_point.append([Crop_x1, Crop_y1])
             
     return cropped_image_list, crop_point
+
+
+
+#=========================================================================================
+#
+# SW_Bootcamp I5
+#
+#=========================================================================================

@@ -1,12 +1,22 @@
+"""
+******************************************************************************************
+ * FileName      : drawBoundarybox.py
+ * Description   : Function to Draw Bounding Boxes on the Image
+ * Author        : Dae ho Kang
+ * Last modified : 2024.08.14
+ ******************************************************************************************
+"""
+
+
 from PIL import Image, ImageDraw, ImageFont
 
 
-def draw_bb(image_list, result, crop_point):
+def drawBoundarybox(image_list, result, crop_point):
     boxed_image_list = []
     class_names = ['battery', 'damaged', 'pollution']
 
     # setting
-    color = [(0, 255, 0), (255, 0, 0), (0, 0, 255)]
+    color = [(0, 255, 0), (255, 0, 0), (155, 155, 255)]
     thickness = 2
 
     # one picture unit
@@ -36,3 +46,10 @@ def draw_bb(image_list, result, crop_point):
         boxed_image_list.append(image)
 
     return boxed_image_list
+
+
+#=========================================================================================
+#
+# SW_Bootcamp I5
+#
+#=========================================================================================

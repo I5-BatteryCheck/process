@@ -1,7 +1,17 @@
-def make_send_data(uploaded_data, fine_result):
+"""
+******************************************************************************************
+ * FileName      : postprocessing_makeData.py
+ * Description   : Function to Post-Process Model Output and Format  Data
+ * Author        : Dae ho Kang
+ * Last modified : 2024.08.14
+ ******************************************************************************************
+"""
+
+
+def postprocessing_makeData(uploaded_data, fine_result, criteria):
     # criteria
-    damaged_criteria = 0.01
-    pollution_criteria =0.05
+    damaged_criteria = criteria['damaged_criteria']
+    pollution_criteria =criteria['pollution_criteria']
 
     # classes
     classes =['BATTERY', 'DAMAGED', 'POLLUTION']
@@ -109,5 +119,11 @@ def make_send_data(uploaded_data, fine_result):
     # Make data to send RaspberryPi server
     data2RP = {'isNormal' : fine_result['isNormal']}
 
-
     return data2RP, data2MS
+
+
+#=========================================================================================
+#
+# SW_Bootcamp I5
+#
+#=========================================================================================

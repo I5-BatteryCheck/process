@@ -1,37 +1,57 @@
+"""
+******************************************************************************************
+ * FileName      : Model_Server.py
+ * Description   : Flask Server for Serving the Model
+ * Author        : Dae ho Kang
+ * Last modified : 2024.08.14
+ ******************************************************************************************
+"""
+
+
 from ultralytics import YOLO
 import os
 import io
-import cv2
 import requests
 from PIL import Image
 import numpy as np
-from flask import Flask, jsonify,render_template, request, send_file
+from flask import Flask, jsonify, request
 import json
-from flask_cors import CORS
 
 from preprocessing import preprocess
 from predict import predict
-from draw_bb import draw_bb
-from make_send_data import make_send_data
+from drawBoundarybox import drawBoundarybox
+from postprocessing_makeData import postprocessing_makeData
 
 # URL
 main_server_url = ['http://52.79.89.88:8002/api/file/battery']
 raspberrypi_url = ['http://192.168.137.51:5010/post_processing']
 
 # criteria
-damaged_criteria = [0.01]
-pollution_criteria =[0.05]
+criteria = {
+    'conf_criteria' : 0.35,
+    'damaged_criteria' : 0.01,
+    'pollution_criteria' : 0.05
+}
+
+# crop pad
+pad = {
+    'cons_pad' : 0.05,
+    'rand_pad' : 0.05
+}
+
+# model path
+# index 0 model is preprocessing model
+model_path =[
+    './model_folder/nm_best.pt',
+    './model_folder/bl_best.pt'
+]
 
 # save path
 img_path = ['./img_folder']
 
+
 # Load Model
 models = []
-# index 0 model is preprocessing model
-model_path =[
-    './nm_best.pt',
-    './bl_best.pt'
-]
 for path in model_path:
     if os.path.exists(path):
         models.append(YOLO(path))
@@ -42,7 +62,6 @@ for path in model_path:
 
 # Flask server
 app = Flask(__name__)
-CORS(app) 
 
 # Receive Data from Raspberry Pi
 # Predict & Send Results
@@ -70,12 +89,12 @@ def run_model():
     print('complete -receice image')
 
     # Model preprocess (crop image)
-    cropped_image_list, crop_point = preprocess(models[0], image_list)
+    cropped_image_list, crop_point = preprocess(models[0], image_list, pad)
     print('complete -crop image')
 
     # Model predict
     result = []
-    result.append(predict(models[1], cropped_image_list)) # !crop_img_path_list
+    result.append(predict(models[1], cropped_image_list, criteria)) # !crop_img_path_list
     print(result)
 
     # (Not implemented) Ensenble
@@ -83,11 +102,11 @@ def run_model():
         fine_result = result[0]
 
     # Draw boundary box
-    boxed_image_list = draw_bb(image_list, fine_result, crop_point) #!cropped_image_path_list
+    boxed_image_list = drawBoundarybox(image_list, fine_result, crop_point) #!cropped_image_path_list
     print('complete -boxed image')
 
     # Post-processing & Make send data
-    data2RP, data2MS = make_send_data(uploaded_data, fine_result)
+    data2RP, data2MS = postprocessing_makeData(uploaded_data, fine_result, criteria)
     print('-----------')
     print(data2RP)
     print('-----------')
@@ -96,14 +115,11 @@ def run_model():
 
     # Send to mainserver
     files = []
-
     for i, image in enumerate(boxed_image_list):
-        # 이미지 저장을 위한 버퍼 생성
-        buf = io.BytesIO()
-        image.save(buf, format='JPEG')  # JPEG 형식으로 저장
-        img_encoded = buf.getvalue()  # 바이너리 데이터로 변환
-        buf.close()  # 버퍼 닫기
-        # 이미지 파일 추가
+        buf = io.BytesIO() # creat buf to save image
+        image.save(buf, format='JPEG')  # save to JPEG
+        img_encoded = buf.getvalue()  # transform binary data
+        buf.close()
         files.append(('multipartFile', (f'result_img_{i}.jpg', img_encoded, 'image/jpeg')))
 
     files.append(('content', (None, json.dumps(data2MS), 'application/json')))
@@ -112,8 +128,8 @@ def run_model():
 
     response4MS = requests.post(main_server_url[0], files=files)
     print('request mainserver')
-    print("Response body (text):")
-    print(response4MS.text)  # 문자열 형식의 응답 본문
+    print("Response body (text):") # check request to main server
+    print(response4MS.text)
 
     #Send to saspberryPi
     response2RP = requests.post(raspberrypi_url[0], json=data2RP)
@@ -137,3 +153,9 @@ if __name__ == '__main__':
     app.run('0.0.0.0', port=5020, debug=True)
 
 
+
+#=========================================================================================
+#
+# SW_Bootcamp I5
+#
+#=========================================================================================
