@@ -1,8 +1,8 @@
 /******************************************************************************************
- * FileName     : belt.ino
- * Description  : An Arduino Uno board connected to a belt: When the first ultrasonic sensor detects an object, send a capture signal to the Raspberry Pi. 
+ * FileName      : belt.ino
+ * Description   : An Arduino Uno board connected to a belt: When the first ultrasonic sensor detects an object, send a capture signal to the Raspberry Pi. 
                   The belt is controlled based on the battery status determined by the second ultrasonic sensor
- * Author       : GiBeom Park
+ * Author        : GiBeom Park
  * Last Modified : 2024.07.30
  ******************************************************************************************/
 //제품 초기 인식
