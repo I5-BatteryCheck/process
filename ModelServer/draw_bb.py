@@ -1,11 +1,8 @@
-import os
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
+from PIL import Image, ImageDraw, ImageFont
 
 
-def draw_bb(image_path_list, result, crop_point, img_path):
-    boxed_image_path_list = []
+def draw_bb(image_list, result, crop_point):
+    boxed_image_list = []
     class_names = ['battery', 'damaged', 'pollution']
 
     # setting
@@ -13,9 +10,8 @@ def draw_bb(image_path_list, result, crop_point, img_path):
     thickness = 2
 
     # one picture unit
-    for i in range(len(image_path_list)):
-        image_path = image_path_list[i]
-        image = cv2.imread(image_path)
+    for i in range(len(image_list)):
+        image = image_list[i]
 
         # detected object in one picture unit
         for c, box in zip(result[f'{i}']['cls'], result[f'{i}']['xyxy']):
@@ -24,17 +20,19 @@ def draw_bb(image_path_list, result, crop_point, img_path):
             y_min = int(box[1] +crop_point[i][1])
             x_max = int(box[2] +crop_point[i][0])
             y_max = int(box[3] +crop_point[i][1])
-            # Draw the rectangle
-            cv2.rectangle(image, (x_min, y_min), (x_max, y_max), color[int(c)], thickness)
 
+            # Draw the rectangle
+            draw = ImageDraw.Draw(image)
+            draw.rectangle([x_min, y_min, x_max, y_max], 
+                           outline=color[int(c)], width=thickness)
+            
             # draw the label
             label = class_names[int(c)]
-            label_position = (x_min, y_min - 10)
-            cv2.putText(image, label, label_position, cv2.FONT_HERSHEY_SIMPLEX, 0.5, color[int(c)], thickness)
+            label_position = (x_min, y_min - 30)
+            font = ImageFont.truetype("arial.ttf", size=30)
+            draw.text(label_position, label, font=font, fill=color[int(c)])
 
         # save boxed image
-        boxed_image_path = os.path.join( img_path, f'boxed_image_{i}.jpg')
-        boxed_image_path_list.append( boxed_image_path)
-        cv2.imwrite( boxed_image_path, image)
+        boxed_image_list.append(image)
 
-    return boxed_image_path_list
+    return boxed_image_list

@@ -1,7 +1,7 @@
-def predict(model, img_list):
+def predict(model, image_list):
     criteria = 0.35
     result_data ={}
-    results = model(img_list)
+    results = model(image_list)
     for i, result in enumerate(results):
         result_data[f'{i}'] = {}
         result_data[f'{i}']['cls'] = []

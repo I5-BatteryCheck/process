@@ -6,12 +6,12 @@ from PIL import Image, ImageDraw
 
 
 
-def preprocess(model, img_path_list, img_path):
+def preprocess(model, img_list):
     Pad = 0.05
-    cropped_image_path_list = []
+    cropped_image_list = []
     crop_point = []
     # model predict 
-    results = model(img_path_list)
+    results = model(img_list)
 
     # one picture unit
     for i, result in enumerate(results):
@@ -28,7 +28,7 @@ def preprocess(model, img_path_list, img_path):
             y2_list.append(y2)
 
         # open image
-        image = Image.open(img_path_list[i])
+        image = img_list[i]
         image_width, image_height = image.size
         image_width = int(image_width)
         image_height =int(image_height)
@@ -99,9 +99,8 @@ def preprocess(model, img_path_list, img_path):
             print(f'not found battery_{i} in PREPROCESS')
             Crop_x1, Crop_y1 = 0, 0
         # save cropped image
-        cropped_image_path = os.path.join( img_path, f'cropped_img_{i}.jpg')
-        cropped_image_path_list.append( cropped_image_path)
-        cropped_image.save( cropped_image_path)
+
+        cropped_image_list.append(cropped_image)
         crop_point.append([Crop_x1, Crop_y1])
             
-    return cropped_image_path_list, crop_point
+    return cropped_image_list, crop_point

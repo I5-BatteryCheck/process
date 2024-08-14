@@ -1,5 +1,6 @@
 from ultralytics import YOLO
 import os
+import io
 import cv2
 import requests
 from PIL import Image
@@ -15,7 +16,7 @@ from make_send_data import make_send_data
 
 # URL
 main_server_url = ['http://52.79.89.88:8002/api/file/battery']
-raspberrypi_url = ['http://192.168.137.62:5010/post_processing']
+raspberrypi_url = ['http://192.168.137.51:5010/post_processing']
 
 # criteria
 damaged_criteria = [0.01]
@@ -61,21 +62,20 @@ def run_model():
 
     # Receive img data
     images = request.files.getlist('images')
-    img_path_list = []
+    image_list = []
     for image in images:
-        # save img
-        file_path = os.path.join(img_path[0], image.filename)
-        image.save(file_path)
-        img_path_list.append(file_path)
-    print(img_path_list)
+        # load img
+        img = Image.open(image.stream)
+        image_list.append(img)
+    print('complete -receice image')
 
     # Model preprocess (crop image)
-    cropped_image_path_list, crop_point = preprocess(models[0], img_path_list, img_path[0])
-    print(cropped_image_path_list)
+    cropped_image_list, crop_point = preprocess(models[0], image_list)
+    print('complete -crop image')
 
     # Model predict
     result = []
-    result.append(predict(models[1], cropped_image_path_list)) # !crop_img_path_list
+    result.append(predict(models[1], cropped_image_list)) # !crop_img_path_list
     print(result)
 
     # (Not implemented) Ensenble
@@ -83,30 +83,50 @@ def run_model():
         fine_result = result[0]
 
     # Draw boundary box
-    boxed_image_path_list = draw_bb(img_path_list, fine_result, crop_point, img_path[0]) #!cropped_image_path_list
-    print(boxed_image_path_list)
+    boxed_image_list = draw_bb(image_list, fine_result, crop_point) #!cropped_image_path_list
+    print('complete -boxed image')
 
     # Post-processing & Make send data
     data2RP, data2MS = make_send_data(uploaded_data, fine_result)
+    print('-----------')
     print(data2RP)
+    print('-----------')
     print(data2MS)
+    print('-----------')
 
     # Send to mainserver
     files = []
-    for i, file_path in enumerate(boxed_image_path_list):
-        files.append(('multipartFile', (f'result_img_{i}.jpg', open(file_path, 'rb'), 'image/jpeg')))
+
+    for i, image in enumerate(boxed_image_list):
+        # 이미지 저장을 위한 버퍼 생성
+        buf = io.BytesIO()
+        image.save(buf, format='JPEG')  # JPEG 형식으로 저장
+        img_encoded = buf.getvalue()  # 바이너리 데이터로 변환
+        buf.close()  # 버퍼 닫기
+        # 이미지 파일 추가
+        files.append(('multipartFile', (f'result_img_{i}.jpg', img_encoded, 'image/jpeg')))
+
     files.append(('content', (None, json.dumps(data2MS), 'application/json')))
-    print(files)
+    file_names = [file[1][0] for file in files]
+    print(file_names)
 
     response4MS = requests.post(main_server_url[0], files=files)
-    print('Mainserver')
+    print('request mainserver')
     print("Response body (text):")
     print(response4MS.text)  # 문자열 형식의 응답 본문
 
     #Send to saspberryPi
     response2RP = requests.post(raspberrypi_url[0], json=data2RP)
-    print('RaspberryPi')
+    print('request raspberryPi')
 
+    # image save
+    for i, image in enumerate(image_list):
+        image.save(img_path[0]+f'/image_{i}.jpg')
+    for i, image in enumerate(cropped_image_list):
+        image.save(img_path[0]+f'/cropped_image_{i}.jpg')
+    for i, image in enumerate(boxed_image_list):
+        image.save(img_path[0]+f'/boxed_image_{i}.jpg')
+        
     # Jsonify
     res = {"i'm fine" : 'thank you'}
     return jsonify(res)
