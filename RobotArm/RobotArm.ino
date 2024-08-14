@@ -1,7 +1,7 @@
 /******************************************************************************************
- * FileName     : RobotArm.ino
- * Description  : When a pin input is received, perform the specified movement action
- * Author       : Habeen Lee
+ * FileName      : RobotArm.ino
+ * Description   : When a pin input is received, perform the specified movement action
+ * Author        : Habeen Lee
  * Last Modified : 2024.08.13
  ******************************************************************************************/
 #include <open_manipulator_libs.h>
