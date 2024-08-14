@@ -1,8 +1,8 @@
 """
 ******************************************************************************************
- * FileName     : mainServer.py
- * Description  : Running a web server on Raspberry Pi, communication with ESP32 / React / Arduino Uno / and the model server
- * Author       : GiBeom Park ,  Daeho Kang
+ * FileName      : mainServer.py
+ * Description   : Running a web server on Raspberry Pi, communication with ESP32 / React / Arduino Uno / and the model server
+ * Author        : GiBeom Park ,  Daeho Kang
  * Last Modified : 2024.08.10
  ******************************************************************************************
 """
