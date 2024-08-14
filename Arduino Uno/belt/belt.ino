@@ -3,7 +3,7 @@
  * Description  : An Arduino Uno board connected to a belt: When the first ultrasonic sensor detects an object, send a capture signal to the Raspberry Pi. 
                   The belt is controlled based on the battery status determined by the second ultrasonic sensor
  * Author       : GiBeom Park
- * Created Date : 2024.07.30
+ * Last Modified : 2024.07.30
  ******************************************************************************************/
 //제품 초기 인식
 #define TRIG 10 //TRIG 핀 설정 (초음파 보내는 핀)
