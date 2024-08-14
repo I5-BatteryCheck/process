@@ -1,9 +1,9 @@
 """
 ******************************************************************************************
- * FileName     : ArduinoToRaspi.py
- * Description  : Serial communication with the connected Arduino Uno board / When the capture signal is sent from the Arduino Uno board, 
+ * FileName      : ArduinoToRaspi.py
+ * Description   : Serial communication with the connected Arduino Uno board / When the capture signal is sent from the Arduino Uno board, 
                   transmit it to the Raspberry Pi web server
- * Author       : GiBeom Park
+ * Author        : GiBeom Park
  * Last Modified : 2024.08.14
  ******************************************************************************************
 """
