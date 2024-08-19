@@ -28,7 +28,7 @@ CORS(app)
 
 front_server_url = ['http://192.168.137.64:5005/test']
 model_server_url = ['http://192.168.137.6:5020/model']
-#arduino = serial.Serial('/dev/ttyACM1', 9600)
+arduino = serial.Serial('/dev/ttyACM0', 9600)
 
 # 라즈베리에서 인식한 웹캠의 인덱스 ls /dev/video*로 확인 후 수정
 camera_array = [0, 2, 4]
@@ -222,7 +222,7 @@ def read_post_processing():
         print(data)
         if data:
             data2arduino = str(data.get("isNormal", "")).encode('utf-8')
-            #arduino.write(data2arduino)
+            arduino.write(data2arduino)
         return jsonify({})
     except Exception as e:
         print(f'post_processing error: {e}')
