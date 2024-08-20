@@ -17,8 +17,9 @@ import numpy as np
 from flask import Flask, jsonify, request
 import json
 
-from preprocessing import preprocess
 from predict import predict
+from ensemble import ensemble 
+from preprocessing import preprocess
 from drawBoundarybox import drawBoundarybox
 from postprocessing_makeData import postprocessing_makeData
 
@@ -42,12 +43,16 @@ pad = {
 # model path
 # index 0 model is preprocessing model
 model_path =[
-    './model_folder/nm_best.pt',
-    './model_folder/bl_best.pt'
+    './ModelServer/model_folder/preprocess.pt',
+    './ModelServer/model_folder/0.pt',
+    './ModelServer/model_folder/1.pt',
+    './ModelServer/model_folder/2.pt',
+    './ModelServer/model_folder/3.pt',
+    './ModelServer/model_folder/4.pt'
 ]
 
 # save path
-img_path = ['./img_folder']
+img_path = ['../..']
 
 
 # Load Model
@@ -93,16 +98,21 @@ def run_model():
     print('complete -crop image')
 
     # Model predict
-    result = []
-    result.append(predict(models[1], cropped_image_list, criteria)) # !crop_img_path_list
-    print(result)
+    results = []
+    for model in models[1:]:
+        results.append(predict(model, cropped_image_list, criteria)) 
+    #print(results)
 
-    # (Not implemented) Ensenble
-    if len(result) == 1:
-        fine_result = result[0]
+    # Ensenble
+    if len(results) == 1:
+        fine_result = results[0]
+    else:
+        fine_result = ensemble(results, cropped_image_list)
+    print(fine_result)
+        
 
     # Draw boundary box
-    boxed_image_list = drawBoundarybox(image_list, fine_result, crop_point) #!cropped_image_path_list
+    boxed_image_list = drawBoundarybox(image_list, fine_result, crop_point)
     print('complete -boxed image')
 
     # Post-processing & Make send data

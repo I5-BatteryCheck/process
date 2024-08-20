@@ -16,6 +16,7 @@ def predict(model, image_list, criteria):
         result_data[f'{i}'] = {}
         result_data[f'{i}']['cls'] = []
         result_data[f'{i}']['xyxy'] = []
+        result_data[f'{i}']['conf'] = []
 
         for cls, xyxy, conf in zip(result.boxes.cls.tolist(),
                                    result.boxes.xyxy.tolist(), 
@@ -23,6 +24,7 @@ def predict(model, image_list, criteria):
             if conf > conf_criteria:
                 result_data[f'{i}']['cls'].append(cls)
                 result_data[f'{i}']['xyxy'].append(xyxy)
+                result_data[f'{i}']['conf'].append(conf)
 
         result_data[f'{i}']['len'] = len(result_data[f'{i}']['cls'])
         
